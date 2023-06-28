@@ -12,7 +12,7 @@ import { SessionService } from 'src/app/services/session.service';
 
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../services/auth.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 
 describe('LoginComponent', () => {
@@ -21,6 +21,7 @@ describe('LoginComponent', () => {
   let sessionService: SessionService;
   let authService: AuthService;
   let router: Router;
+  let loginRequest: { email: string; password: string };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -44,6 +45,11 @@ describe('LoginComponent', () => {
     sessionService = TestBed.inject(SessionService);
     authService = TestBed.inject(AuthService);
     router = TestBed.inject(Router);
+
+    loginRequest = {
+      email: 'mockUsername@example.com',
+      password: 'password',
+    }; // Crée une requête de connexion
   });
 
   it('should create', () => {
@@ -86,7 +92,6 @@ describe('LoginComponent', () => {
 
   it('should call login method of authService with correct login request', () => {
     const loginSpy = jest.spyOn(authService, 'login').mockReturnValue(of()); // Crée un espion sur la méthode 'login' du service 'authService' et retourne un observable vide
-    const loginRequest = { email: 'test@example.com', password: 'password' };
 
     component.form.setValue(loginRequest); // Définit les valeurs du formulaire
 
@@ -107,15 +112,25 @@ describe('LoginComponent', () => {
     };
     jest.spyOn(authService, 'login').mockReturnValue(of(sessionInformation)); // Crée un espion sur la méthode 'login' du service 'authService' et retourne un observable contenant les informations de session
     const sessionLoginSpy = jest.spyOn(sessionService, 'logIn'); // Crée un espion sur la méthode 'logIn' du service 'sessionService'
-    const loginRequest = {
-      email: 'mockUsername@example.com',
-      password: 'password',
-    }; // Crée une requête de connexion
 
     component.form.setValue(loginRequest); // Définit les valeurs du formulaire
 
     component.submit(); // Appelle la méthode 'submit'
 
     expect(sessionLoginSpy).toHaveBeenCalledWith(sessionInformation); // Vérifie si la méthode 'logIn' a été appelée avec les bonnes informations de session
+  });
+
+  it('should set onError to true when login fails', () => {
+    // Arrange
+    jest
+      .spyOn(authService, 'login')
+      .mockReturnValue(throwError(() => new Error('Login error'))); // Simulate an error
+
+    // Act
+    component.submit(); // Call the submit method
+    fixture.detectChanges(); // Update the component
+
+    // Assert
+    expect(component.onError).toBeTruthy();
   });
 });
