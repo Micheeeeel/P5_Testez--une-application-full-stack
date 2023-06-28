@@ -28,9 +28,9 @@ describe('LoginComponent', () => {
         MatIconModule,
         MatFormFieldModule,
         MatInputModule,
-        ReactiveFormsModule]
-    })
-      .compileComponents();
+        ReactiveFormsModule,
+      ],
+    }).compileComponents();
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -38,5 +38,29 @@ describe('LoginComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should make the form invalid when it is empty', () => {
+    component.form.setValue({
+      email: '',
+      password: '',
+    });
+    expect(component.form.valid).toBeFalsy();
+  });
+
+  it('should make the form invalid when the fields are filled incorrectly', () => {
+    component.form.setValue({
+      email: 'invalidemail', // Invalid email
+      password: 'pass',
+    });
+    expect(component.form.valid).toBeFalsy();
+  });
+
+  it('should make the form valid when all fields are filled correctly', () => {
+    component.form.setValue({
+      email: 'test@example.com',
+      password: 'password123',
+    });
+    expect(component.form.valid).toBeTruthy();
   });
 });
