@@ -112,12 +112,14 @@ describe('LoginComponent', () => {
     };
     jest.spyOn(authService, 'login').mockReturnValue(of(sessionInformation)); // Crée un espion sur la méthode 'login' du service 'authService' et retourne un observable contenant les informations de session
     const sessionLoginSpy = jest.spyOn(sessionService, 'logIn'); // Crée un espion sur la méthode 'logIn' du service 'sessionService'
+    const routerNavigateSpy = jest.spyOn(router, 'navigate'); // Crée un espion sur la méthode 'navigate' du service 'router'
 
     component.form.setValue(loginRequest); // Définit les valeurs du formulaire
 
     component.submit(); // Appelle la méthode 'submit'
 
     expect(sessionLoginSpy).toHaveBeenCalledWith(sessionInformation); // Vérifie si la méthode 'logIn' a été appelée avec les bonnes informations de session
+    expect(routerNavigateSpy).toHaveBeenCalledWith(['/sessions']); // Vérifie si la méthode 'navigate' a été appelée avec la bonne route
   });
 
   it('should set onError to true when login fails', () => {
@@ -128,7 +130,7 @@ describe('LoginComponent', () => {
 
     // Act
     component.submit(); // Call the submit method
-    fixture.detectChanges(); // Update the component
+    //fixture.detectChanges(); // Update the component
 
     // Assert
     expect(component.onError).toBeTruthy();
