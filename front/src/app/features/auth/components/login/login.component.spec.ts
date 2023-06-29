@@ -90,17 +90,26 @@ describe('LoginComponent', () => {
     expect(submitSpy).toHaveBeenCalled(); // Check that the submit method has been called
   });
 
-  it('should call login method of authService with correct login request', () => {
-    const loginSpy = jest.spyOn(authService, 'login').mockReturnValue(of()); // Crée un espion sur la méthode 'login' du service 'authService' et retourne un observable vide
+  it('should set onError to true when login fails', () => {
+    // Arrange
+    jest
+      .spyOn(authService, 'login')
+      .mockReturnValue(throwError(() => new Error('Login error'))); // Simulate an error
 
-    component.form.setValue(loginRequest); // Définit les valeurs du formulaire
+    // Set form values
+    component.form.controls['email'].setValue(loginRequest.email);
+    component.form.controls['password'].setValue(loginRequest.password);
 
-    component.submit(); // Appelle la méthode 'submit'
+    // Act
+    component.submit(); // Call the submit method
+    //fixture.detectChanges(); // Update the component
 
-    expect(loginSpy).toHaveBeenCalledWith(loginRequest); // Vérifie si la méthode 'login' a été appelée avec les bonnes valeurs
+    // Assert
+    expect(component.onError).toBeTruthy();
   });
 
-  it('should call logIn method of sessionService with correct session information', () => {
+  // Test d'intégration pour la méthode 'submit'
+  it('should call authService.login and navigate to "/sessions" on successful login', () => {
     const sessionInformation = {
       token: 'mockToken',
       type: 'mockType',
@@ -110,29 +119,35 @@ describe('LoginComponent', () => {
       lastName: 'mockLastName',
       admin: true,
     };
+
     jest.spyOn(authService, 'login').mockReturnValue(of(sessionInformation)); // Crée un espion sur la méthode 'login' du service 'authService' et retourne un observable contenant les informations de session
     const sessionLoginSpy = jest.spyOn(sessionService, 'logIn'); // Crée un espion sur la méthode 'logIn' du service 'sessionService'
     const routerNavigateSpy = jest.spyOn(router, 'navigate'); // Crée un espion sur la méthode 'navigate' du service 'router'
 
-    component.form.setValue(loginRequest); // Définit les valeurs du formulaire
+    // Set form values
+    component.form.controls['email'].setValue(loginRequest.email);
+    component.form.controls['password'].setValue(loginRequest.password);
 
-    component.submit(); // Appelle la méthode 'submit'
+    // Trigger submit
+    component.submit();
 
-    expect(sessionLoginSpy).toHaveBeenCalledWith(sessionInformation); // Vérifie si la méthode 'logIn' a été appelée avec les bonnes informations de session
-    expect(routerNavigateSpy).toHaveBeenCalledWith(['/sessions']); // Vérifie si la méthode 'navigate' a été appelée avec la bonne route
+    expect(authService.login).toHaveBeenCalledWith(loginRequest);
+    expect(sessionLoginSpy).toHaveBeenCalledWith(sessionInformation);
+    expect(routerNavigateSpy).toHaveBeenCalledWith(['/sessions']);
   });
 
-  it('should set onError to true when login fails', () => {
-    // Arrange
-    jest
-      .spyOn(authService, 'login')
-      .mockReturnValue(throwError(() => new Error('Login error'))); // Simulate an error
+  it('should enable submit button only when form fields are filled', async () => {
+    const submitButton = fixture.nativeElement.querySelector(
+      'button[type="submit"]'
+    ); // Get the submit button
 
-    // Act
-    component.submit(); // Call the submit method
-    //fixture.detectChanges(); // Update the component
+    expect(submitButton.disabled).toBeTruthy(); // Vérifie que le bouton de soumission est désactivé initialement;
 
-    // Assert
-    expect(component.onError).toBeTruthy();
+    // Set form values
+    component.form.controls['email'].setValue(loginRequest.email);
+    component.form.controls['password'].setValue(loginRequest.password);
+    fixture.detectChanges(); // Update the component
+
+    expect(submitButton.disabled).toBeFalsy(); // Vérifie que le bouton de soumission est activé après avoir rempli les champs du formulaire
   });
 });

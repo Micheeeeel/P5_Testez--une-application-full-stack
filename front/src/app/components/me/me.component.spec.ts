@@ -109,8 +109,6 @@ describe('MeComponent', () => {
     // Create spies for the required services
     const deleteSpy = jest.spyOn(userService, 'delete').mockReturnValue(of({}));
     const matSnackBarSpy = jest.spyOn(matSnackBar, 'open');
-    // const logOut = jest.spyOn(sessionService, 'logOut');
-    // const navigateSpy = jest.spyOn(router, 'navigate');
 
     // Call the delete method
     component.delete();
@@ -124,11 +122,5 @@ describe('MeComponent', () => {
       'Close',
       { duration: 3000 }
     );
-
-    // // Verify that sessionService.logOut is called
-    // expect(logOut).toHaveBeenCalled();
-
-    // // Verify that router.navigate is called with the correct argument
-    // expect(navigateSpy).toHaveBeenCalled();
   });
 });
