@@ -9,6 +9,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { expect } from '@jest/globals';
 
 import { RegisterComponent } from './register.component';
+import { last } from 'cypress/types/lodash';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
@@ -20,14 +21,13 @@ describe('RegisterComponent', () => {
       imports: [
         BrowserAnimationsModule,
         HttpClientModule,
-        ReactiveFormsModule,  
+        ReactiveFormsModule,
         MatCardModule,
         MatFormFieldModule,
         MatIconModule,
-        MatInputModule
-      ]
-    })
-      .compileComponents();
+        MatInputModule,
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
@@ -36,5 +36,26 @@ describe('RegisterComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it(`should make the form valid when it is not empty`, () => {
+    component.form.setValue({
+      email: 'mockUsername@example.com',
+      password: 'password',
+      lastName: 'mockLastName',
+      firstName: 'mockFirstName',
+    });
+
+    expect(component.form.valid).toBeTruthy();
+  });
+
+  it(`should make the form invalid when it is not well filled`, () => {
+    component.form.setValue({
+      email: 'mockUsername@example.com',
+      password: '',
+      lastName: 'mockLastName',
+      firstName: 'mockFirstName',
+    });
+    expect(component.form.valid).toBeFalsy();
   });
 });
