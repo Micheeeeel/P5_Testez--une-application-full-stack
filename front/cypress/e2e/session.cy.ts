@@ -1,6 +1,6 @@
-describe('Create Session, vérify details and finally delete the session', () => {
+describe('Create Session, Update, Verify Details, and Delete Session', () => {
   beforeEach(() => {
-    // Se connecter en tant qu'utilisateur admin
+    // Log in as an admin user
     cy.visit('/login');
     cy.get('input[formControlName=email]').type('yoga@studio.com');
     cy.get('input[formControlName=password]').type(
@@ -8,53 +8,7 @@ describe('Create Session, vérify details and finally delete the session', () =>
     );
   });
 
-  it('Create/delete Session', () => {
-    // Cliquer sur le bouton "Create"
-    cy.get('button[routerLink="create"]').click();
-
-    // Remplir le formulaire
-    cy.get('input[formControlName=name]').type('Session de test');
-    cy.get('textarea[formControlName="description"]').type(
-      'Join our yoga session for a relaxing experience.'
-    );
-    cy.get('input[formControlName="date"]').type('2023-07-10');
-
-    // Sélectionner un enseignant dans la liste déroulante
-    cy.get('mat-select[formControlName="teacher_id"]').click();
-    cy.get('mat-option').contains('Margot DELAHAYE').click();
-
-    // Soumettre le formulaire
-    cy.get('button[type="submit"]').click();
-
-    // Vérifier que le message de succès est affiché
-    cy.contains('Session created').should('be.visible');
-
-    // Vérifier que la session est bien affichée dans la liste
-    cy.contains('Session de test').should('be.visible');
-
-    // Clique sur le bouton "Detail" de la session nouvellement créée
-    cy.get('.items mat-card')
-      .last()
-      .within(() => {
-        cy.contains('Detail').click();
-      });
-
-    // Vérifier que les détails de la session sont bien affichés
-    cy.get('mat-card-title').should('contain', 'Session De Test');
-    cy.get('mat-card-content').should(
-      'contain',
-      'Join our yoga session for a relaxing experience.'
-    );
-    cy.get('mat-card-content').should('contain', 'July 10, 2023');
-
-    // clicker sur le bouton "Delete"
-    cy.contains('Delete').click();
-
-    // Vérifier que le message de succès est affiché
-    cy.contains('Session deleted !').should('be.visible');
-  });
-
-  it('Create and update Session', () => {
+  it('Create, Update, Verify Details, and Delete Session', () => {
     // Click on the "Create" button
     cy.get('button[routerLink="create"]').click();
 
@@ -71,7 +25,10 @@ describe('Create Session, vérify details and finally delete the session', () =>
     // Verify that the success message for session creation is displayed
     cy.contains('Session created').should('be.visible');
 
-    // Click on the "Edit" button of the newly created session
+    // Verify that the session is displayed in the list
+    cy.contains('Session de test').should('be.visible');
+
+    // Click on the "Edit" button
     cy.contains('Edit').click();
 
     // Update the session details
@@ -89,5 +46,26 @@ describe('Create Session, vérify details and finally delete the session', () =>
     cy.contains('Updated Session').should('be.visible');
     cy.contains('Join our updated yoga session.').should('be.visible');
     cy.contains('July 15, 2023').should('be.visible');
+
+    // Click on the "Detail" button of the newly created session
+    cy.get('.items mat-card')
+      .last()
+      .within(() => {
+        cy.contains('Detail').click();
+      });
+
+    // Verify that the session details are displayed correctly
+    cy.get('mat-card-title').should('contain', 'Session De Test');
+    cy.get('mat-card-content').should(
+      'contain',
+      'Join our yoga session for a relaxing experience.'
+    );
+    cy.get('mat-card-content').should('contain', 'July 10, 2023');
+
+    // Click on the "Delete" button
+    cy.contains('Delete').click();
+
+    // Verify that the success message for session deletion is displayed
+    cy.contains('Session deleted').should('be.visible');
   });
 });
