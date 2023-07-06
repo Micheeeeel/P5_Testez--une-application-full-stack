@@ -1,10 +1,10 @@
-import { YogaLogin } from '../pages/yogaLogin';
+import { TestUtil } from '../pages/yogaLogin';
 
 describe('Login spec', () => {
-  let loginPage: YogaLogin;
+  let loginPage: TestUtil;
 
   beforeEach(() => {
-    loginPage = new YogaLogin();
+    loginPage = new TestUtil();
     loginPage.visitLogin(); // Visite de la page de connexion avant chaque test
   });
 
@@ -74,10 +74,10 @@ describe('Login spec', () => {
 });
 
 describe('Register spec', () => {
-  let loginPage: YogaLogin;
+  let loginPage: TestUtil;
 
   beforeEach(() => {
-    loginPage = new YogaLogin();
+    loginPage = new TestUtil();
     loginPage.visitRegister(); // Visite de la page de connexion avant chaque test
   });
 
@@ -142,10 +142,10 @@ describe('Register spec', () => {
 });
 
 describe('MeComponent', () => {
-  let loginPage: YogaLogin;
+  let loginPage: TestUtil;
 
   beforeEach(() => {
-    loginPage = new YogaLogin();
+    loginPage = new TestUtil();
     loginPage.visitLogin(); // Visite de la page de connexion avant chaque test
 
     cy.intercept('POST', '/api/auth/login', {
@@ -247,9 +247,13 @@ describe('MeComponent', () => {
 });
 
 describe('Create Session, Update, Verify Details, and Delete Session', () => {
-  it('Create, Update, Verify Details, and Delete Session', () => {
-    cy.visit('/login');
+  let loginPage: TestUtil;
 
+  it('Create, Update, Verify Details, and Delete Session', () => {
+    loginPage = new TestUtil();
+    loginPage.visitLogin(); // Visite de la page de connexion avant chaque test
+
+    // Intercept the login request and mock the response
     cy.intercept('POST', '/api/auth/login', {
       body: {
         id: 1,
@@ -260,106 +264,77 @@ describe('Create Session, Update, Verify Details, and Delete Session', () => {
       },
     });
 
-    // mock the response for the GET request to /api/session
-    cy.intercept(
-      {
-        method: 'GET',
-        url: '/api/session',
-      },
-      [
-        {
-          id: 1,
-          name: 'Session de test',
-          description: 'Join our yoga session for a relaxing experience.',
-          date: '2023-07-10',
-          teacher_id: 1,
-        },
-      ]
-    ).as('session');
-
-    cy.intercept(
-      {
-        method: 'GET',
-        url: '/api/session/1',
-      },
+    // Intercept the GET request to /api/session and mock the response
+    cy.intercept('GET', '/api/session', [
       {
         id: 1,
         name: 'Session de test',
         description: 'Join our yoga session for a relaxing experience.',
         date: '2023-07-10',
         teacher_id: 1,
-      }
-    ).as('session1');
-
-    cy.intercept(
-      {
-        method: 'GET',
-        url: '/api/teacher',
       },
-      [
-        {
-          id: 1,
-          firstName: 'Margot',
-          lastName: 'DELAHAYE',
-          email: 'margot@truc.com',
-          password: 'test',
-          admin: true,
-        },
-      ]
-    ).as('teacher');
+    ]).as('session');
 
-    cy.intercept(
+    // Intercept the GET request to /api/session/1 and mock the response
+    cy.intercept('GET', '/api/session/1', {
+      id: 1,
+      name: 'Session de test',
+      description: 'Join our yoga session for a relaxing experience.',
+      date: '2023-07-10',
+      teacher_id: 1,
+    }).as('session1');
+
+    // Intercept the GET request to /api/teacher and mock the response
+    cy.intercept('GET', '/api/teacher', [
       {
-        method: 'POST',
-        url: '/api/session',
+        id: 1,
+        firstName: 'Margot',
+        lastName: 'DELAHAYE',
+        email: 'margot@truc.com',
+        password: 'test',
+        admin: true,
       },
-      {
-        statusCode: 201,
-        body: {
-          id: 1,
-          name: 'Session de test',
-          description: 'Join our yoga session for a relaxing experience.',
-          date: '2023-07-10',
-          teacher_id: 1,
-        },
-      }
-    ).as('createSession');
+    ]).as('teacher');
 
-    cy.intercept(
-      {
-        method: 'PUT',
-        url: '/api/session/1',
+    // Intercept the POST request to /api/session and mock the response
+    cy.intercept('POST', '/api/session', {
+      statusCode: 201,
+      body: {
+        id: 1,
+        name: 'Session de test',
+        description: 'Join our yoga session for a relaxing experience.',
+        date: '2023-07-10',
+        teacher_id: 1,
       },
-      {
-        statusCode: 200,
-        body: {
-          id: 1,
-          name: 'Updated Session',
-          description: 'Join our updated yoga session.',
-          date: '2023-07-15',
-          teacher_id: 1,
-        },
-      }
-    ).as('updateSession');
+    }).as('createSession');
 
-    cy.intercept(
-      {
-        method: 'DELETE',
-        url: '/api/session/1',
+    // Intercept the PUT request to /api/session/1 and mock the response
+    cy.intercept('PUT', '/api/session/1', {
+      statusCode: 200,
+      body: {
+        id: 1,
+        name: 'Updated Session',
+        description: 'Join our updated yoga session.',
+        date: '2023-07-15',
+        teacher_id: 1,
       },
-      {
-        statusCode: 204,
-      }
-    ).as('deleteSession');
+    }).as('updateSession');
 
+    // Intercept the DELETE request to /api/session/1 and mock the response
+    cy.intercept('DELETE', '/api/session/1', {
+      statusCode: 204,
+    }).as('deleteSession');
+
+    // Enter login credentials and submit the form
     cy.get('input[formControlName=email]').type('yoga@studio.com');
     cy.get('input[formControlName=password]').type(
       `${'test!1234'}{enter}{enter}`
     );
 
+    // Assert that the URL includes '/sessions' indicating successful login
     cy.url().should('include', '/sessions');
 
-    // Click on the "Create" button
+    // Click on the "Create" button to create a new session
     cy.get('button[routerLink="create"]').click();
 
     // Fill out the form to create a new session
@@ -372,19 +347,19 @@ describe('Create Session, Update, Verify Details, and Delete Session', () => {
     cy.get('mat-option').contains('Margot DELAHAYE').click();
     cy.get('button[type="submit"]').click();
 
-    // Verify that the success message for session creation is displayed
+    // Assert that the success message for session creation is displayed
     cy.contains('Session created').should('be.visible');
 
-    // wait for the GET request to /api/session to return
+    // Wait for the GET request to /api/session to return
     cy.wait('@session');
 
-    // Verify that the session is displayed in the list
+    // Assert that the session is displayed in the list
     cy.contains('Session de test').should('be.visible');
 
-    // Click on the "Edit" button
+    // Click on the "Edit" button to edit the session
     cy.contains('Edit').click();
 
-    // wait for the GET request to /api/session/1 to return
+    // Wait for the GET request to /api/session/1 to return
     cy.wait('@session1');
 
     // Update the session details
@@ -395,13 +370,13 @@ describe('Create Session, Update, Verify Details, and Delete Session', () => {
     cy.get('input[formControlName="date"]').clear().type('2023-07-15');
     cy.get('button[type="submit"]').click();
 
-    // wait for the PUT request to /api/session/1 to return
+    // Wait for the PUT request to /api/session/1 to return
     cy.wait('@updateSession');
 
-    // Verify that the success message for session update is displayed
+    // Assert that the success message for session update is displayed
     cy.contains('Session updated').should('be.visible');
 
-    // wait for the GET request to /api/session to return
+    // Wait for the GET request to /api/session to return
     cy.wait('@session');
 
     // Click on the "Detail" button of the newly created session
@@ -411,29 +386,26 @@ describe('Create Session, Update, Verify Details, and Delete Session', () => {
         cy.contains('Detail').click();
       });
 
-    // Verify that the session details are displayed correctly
+    // Assert that the session details are displayed correctly
     cy.get('mat-card-title').should('contain', 'Session De Test');
-    // cy.get('mat-card-content').should(
-    //   'contain',
-    //   'Join our yoga session for a relaxing experience.'
-    // );
+    // cy.get('mat-card-content').should('contain', 'Join our yoga session for a relaxing experience.');
     // cy.get('mat-card-content').should('contain', 'July 10, 2023');
 
-    // Click on the "Delete" button
+    // Click on the "Delete" button to delete the session
     cy.contains('Delete').click();
 
-    // wait for the DELETE request to /api/session/1 to return
+    // Wait for the DELETE request to /api/session/1 to return
     cy.wait('@deleteSession');
 
-    // Verify that the success message for session deletion is displayed
+    // Assert that the success message for session deletion is displayed
     cy.contains('Session deleted').should('be.visible');
   });
+});
 
-  describe('Test the not found component', () => {
-    it('should redirect to the not found page', () => {
-      cy.visit('/not-found');
+describe('Test the not found component', () => {
+  it('should redirect to the not found page', () => {
+    cy.visit('/not-found');
 
-      cy.contains('Page not found').should('be.visible');
-    });
+    cy.contains('Page not found').should('be.visible');
   });
 });

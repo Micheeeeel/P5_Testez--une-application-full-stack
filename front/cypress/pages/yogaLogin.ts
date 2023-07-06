@@ -1,4 +1,4 @@
-export class YogaLogin {
+export class TestUtil {
   public visitLogin(): void {
     cy.visit('/login');
   }
