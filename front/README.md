@@ -1,72 +1,40 @@
-# Yoga
+# TESTER-UNE-APPLICATION-FULL-STACK
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.1.0.
+Ce projet contient des tests unitaires et d'intégration pour la partie front-end et back-end de l'application.
 
-## Start the project
+## Installation de la base de données
 
-Git clone:
+1. Assurez-vous d'avoir une instance de la base de données (par exemple, MySQL) installée et configurée sur votre machine.
+2. Exécutez le script de création de la base de données fourni dans le dossier `ressources/sql` pour créer la structure de base de données nécessaire.
+3. Renseignez les informations de connexion à la base de données dans le fichier de configuration `application.properties`.
 
-> git clone https://github.com/OpenClassrooms-Student-Center/P5-Full-Stack-testing
+## Installation de l'application
 
-Go inside folder:
+1. Assurez-vous d'avoir les dépendances nécessaires installées : Java, Node.js, Maven.
+2. Clonez ce dépôt sur votre machine locale.
+3. Accédez au répertoire du projet back-end et exécutez la commande `mvn clean install` pour télécharger les dépendances et compiler le projet.
+4. Accédez au répertoire du projet front-end et exécutez la commande `npm install` pour installer les dépendances du front-end.
 
-> cd yoga
+## Lancement de l'application
 
-Install dependencies:
+1. Accédez au répertoire du projet back-end et exécutez la commande `mvn spring-boot:run` pour démarrer l'application back-end.
+2. Accédez au répertoire du projet front-end et exécutez la commande `npm run start` pour démarrer l'application front-end.
 
-> npm install
+## Exécution des tests
 
-Launch Front-end:
+### Tests unitaires et d'intégration front-end (Jest)
 
-> npm run start;
+1. Accédez au répertoire du projet front-end et exécutez la commande `npm run test` pour lancer les tests unitaires front-end avec Jest.
+2. Pour afficher le rapport de couverture, exécutez la commande `npm run test -- --coverage`. Le rapport `index.html` sera généré dans le dossier `front/coverage/jest/lcov-report/index.html`.
 
+### Tests end-to-end (Cypress)
 
-## Ressources
+1. Accédez au répertoire du projet front-end et exécutez la commande `npm run e2e` pour lancer les tests end-to-end avec Cypress.
+2. Pour afficher le rapport de couverture, exécutez la commande `npm run e2e:coverage`. Le rapport `index.html` sera généré dans le dossier `front/coverage/lcov-report/index.html`.
 
-### Mockoon env 
+### Tests unitaires et d'intégration back-end (JUnit et Mockito)
 
-### Postman collection
+1. Accédez au répertoire du projet back-end et exécutez la commande `mvn clean test` pour lancer les tests unitaires et d'intégration back-end avec JUnit et Mockito.
+2. Le rapport de couverture sera généré dans le dossier `back/target/site/jacoco/index.html`.
 
-For Postman import the collection
-
-> ressources/postman/yoga.postman_collection.json 
-
-by following the documentation: 
-
-https://learning.postman.com/docs/getting-started/importing-and-exporting-data/#importing-data-into-postman
-
-
-### MySQL
-
-SQL script for creating the schema is available `ressources/sql/script.sql`
-
-By default the admin account is:
-- login: yoga@studio.com
-- password: test!1234
-
-
-### Test
-
-#### E2E
-
-Launching e2e test:
-
-> npm run e2e
-
-Generate coverage report (you should launch e2e test before):
-
-> npm run e2e:coverage
-
-Report is available here:
-
-> front/coverage/lcov-report/index.html
-
-#### Unitary test
-
-Launching test:
-
-> npm run test
-
-for following change:
-
-> npm run test:watch
+Assurez-vous d'installer les versions nécessaires de Java, Node.js, Maven et Angular CLI (version 14.1.0) pour garantir la compatibilité avec le projet.
