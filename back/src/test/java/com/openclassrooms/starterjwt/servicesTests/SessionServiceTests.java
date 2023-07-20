@@ -45,10 +45,14 @@ public class SessionServiceTests {
 
     private Teacher teacher; // beforeEach: create a teacher
 
+    // create a teacher
     @BeforeEach
     public void CreateTeacher() {
+        // we could directly get this teacher from table teacher, 
+        // but we want this class to test solely the session service so we just create a teacher 
         this.teacher = new Teacher((long) 1, "DELAHAYE", "Margot", LocalDateTime.parse("2024-04-10T12:00:00"),
                 LocalDateTime.parse("2024-04-10T12:00:00"));
+
     }
 
     // create a session
@@ -97,6 +101,8 @@ public class SessionServiceTests {
         Session receivedSession = sessionSrvc.create(session); // on crée la session
 
         // THEN
+        // check that sessionsrepo findById is called once
+        verify(sessionRepo, times(1)).save(session);
         assertThat(receivedSession).isEqualTo(session);
 
     }
@@ -112,6 +118,8 @@ public class SessionServiceTests {
         List<Session> receivedSessions = sessionSrvc.findAll();
 
         // THEN
+        // check that sessionsrepo findById is called once
+        verify(sessionRepo, times(1)).findAll();
         assertThat(receivedSessions).isEqualTo(sessionList);
     }
 
@@ -125,6 +133,8 @@ public class SessionServiceTests {
         Session receivedSession = sessionSrvc.getById(1L);
 
         // THEN
+        // check that sessionsrepo findById is called once
+        verify(sessionRepo, times(1)).findById(1L);
         assertThat(receivedSession).isEqualTo(session);
     }
 
@@ -135,12 +145,15 @@ public class SessionServiceTests {
         Session session = sessionList.get(0);
         session.setName("Test");
         session.setDescription("Description Test");
+
         given(sessionRepo.save(session)).willReturn(sessionList.get(0));
 
         // WHEN -- when update() is called on the session service, return the session
         Session received = sessionSrvc.update((long) 1, session);
 
         // THEN
+        // check that sessionsrepo findById is called once
+        verify(sessionRepo, times(1)).save(session);
         assertThat(received).isEqualTo(session);
     }
 
@@ -150,21 +163,19 @@ public class SessionServiceTests {
     public void shldCallTheDeleteMethodWithRightId() {
         // GIVEN -- a session
         sessionSrvc.delete((long) 10);
-        verify(sessionRepo).deleteById(10L);
+        verify(sessionRepo).deleteById(10L);    // check that sessionsrepo deleteById is called once with the right id
     }
 
     // test that the participate method of session service calls the save method
     @Test
     public void ThrowNotFoundWhenParticipatingToUnkownSession() {
         // GIVEN
-        given(sessionRepo.findById(9L)).willReturn(Optional.empty());
+        given(sessionRepo.findById(1L)).willReturn(Optional.empty());
 
         // WHEN -- when participate() is called on an empty session, return the notfound
         // exception
-        Assertions.assertThrows(NotFoundException.class, () -> sessionSrvc.participate(9L, 6L));
+        Assertions.assertThrows(NotFoundException.class, () -> sessionSrvc.participate(1L, 1L));
 
-        // check that sessionsrepo findById is called once
-        verify(sessionRepo, times(1)).findById(9L);
 
     }
 
@@ -180,7 +191,7 @@ public class SessionServiceTests {
         // the new participant
         sessionSrvc.participate(3L, 8L);
 
-        // THEN
+        // THEN : check that the size of the list of participants has increased by 1
         assertThat(sessionList.get(0).getUsers().size()).isEqualTo(previousSize + 1);
     }
 

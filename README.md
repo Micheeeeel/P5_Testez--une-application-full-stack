@@ -36,5 +36,6 @@ Ce projet contient des tests unitaires et d'intégration pour la partie front-en
 
 1. Accédez au répertoire du projet back-end et exécutez la commande `mvn clean test` pour lancer les tests unitaires et d'intégration back-end avec JUnit et Mockito.
 2. Le rapport de couverture sera généré dans le dossier `back/target/site/jacoco/index.html`.
+3. Assurez-vous d'exécuter le script de base de données fourni dans le dossier `ressources/sql` avant de lancer les tests.
 
 Assurez-vous d'installer les versions nécessaires de Java, Node.js, Maven et Angular CLI (version 14.1.0) pour garantir la compatibilité avec le projet.

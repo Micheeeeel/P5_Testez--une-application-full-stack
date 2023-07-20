@@ -24,6 +24,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.io.UnsupportedEncodingException;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
@@ -34,8 +36,9 @@ public class SessionControllerTests {
 
     private String token;
 
+    // récupérer le token
     @BeforeAll
-    public void getToken() throws Exception {
+    public void itShldGetToken() throws Exception {
         // Arrange -- créer un compte admin
         String email = "yoga@studio.com";
         String password = "test!1234";
@@ -47,12 +50,12 @@ public class SessionControllerTests {
                 .content(requestBody))
                 .andReturn();
 
-        token = "Bearer " + JsonPath.read(result.getResponse().getContentAsString(), "$.token");
+        token = "Bearer " + JsonPath.read(result.getResponse().getContentAsString(), "$.token");    // filtre le token
     }
 
     @BeforeEach
     // création d'une session
-    public void createSession() throws Exception {
+    public void itShldCreateSession() throws Exception {
         // Arrange -- create a session
         String name = "First Session";
         long teacherID = 1L;
@@ -72,16 +75,15 @@ public class SessionControllerTests {
         // Assert -- assert that the status is 200 and that the returned name is the
         // same
         result.andExpect(status().isOk())
-                .andExpect(jsonPath("name", is(name)));
+                .andExpect(jsonPath("name", is(name)));     
     }
 
     @AfterEach
     // suppréssion de la session
-    public void deleteSession() throws Exception {
+    public void itShlDeleteSession() throws Exception {
         // Arrange -- identifier l'id de la session à supprimer
-        ResultActions resultGet = mockMvc.perform(get("/api/session/").header("Authorization", token));
-        String content = resultGet.andReturn().getResponse().getContentAsString();
-        int id = JsonPath.read(content, "$[0].id");
+        int id = getId();
+
 
         // Act -- simulate a delete request to the route /api/session/id
         ResultActions result = mockMvc.perform(delete("/api/session/" + id).header("Authorization", token));
@@ -91,9 +93,10 @@ public class SessionControllerTests {
 
     // Test de la route /api/session/
     @Test
-    public void itShouldGetAllSessions() throws Exception {
+    public void itShldGetAllSessions() throws Exception {
         // Act -- simulate a get request to the route /api/session/
         ResultActions result = mockMvc.perform(get("/api/session/").header("Authorization", token));
+
         // Assert -- assert that the status is 200
         result.andExpect(status().isOk());
 
@@ -102,10 +105,9 @@ public class SessionControllerTests {
     // tester la route /api/session/{id}
     @Test
     public void itShldGetOneSession() throws Exception {
-        // Arrange -- identifier l'id de la session à supprimer
-        ResultActions resultGet = mockMvc.perform(get("/api/session/").header("Authorization", token));
-        String content = resultGet.andReturn().getResponse().getContentAsString();
-        int id = JsonPath.read(content, "$[0].id");
+        // Arrange -- identifier le premier id de la session
+        int id = getId();
+
 
         // Act -- simulate a get request to the route /api/session/id
         ResultActions result = mockMvc.perform(get("/api/session/" + id).header("Authorization", token));
@@ -118,7 +120,7 @@ public class SessionControllerTests {
         // Act -- simulate a get request to the route /api/session/Invalid
         ResultActions result = mockMvc.perform(get("/api/session/Invalid").header("Authorization", token));
         // Assert -- simulate a get request to the route /api/session/Invalid
-        result.andExpect(status().isBadRequest());
+        result.andExpect(status().isBadRequest());  // 400 (Bad Request)
     }
 
     // tester la modification d'une session
@@ -136,10 +138,7 @@ public class SessionControllerTests {
                 "\"description\":\"" + description + "\"," +
                 "\"date\":\"" + date + "\"}";
 
-        // Arrange -- identifier l'id de la session à supprimer
-        ResultActions resultGet = mockMvc.perform(get("/api/session/").header("Authorization", token));
-        String content = resultGet.andReturn().getResponse().getContentAsString();
-        int id = JsonPath.read(content, "$[0].id");
+        int id = getId();
 
         // Act -- simulate a post request to the route /api/session/
         ResultActions result = mockMvc.perform(put("/api/session/" + id) // 1 because we already created a session with
@@ -153,13 +152,19 @@ public class SessionControllerTests {
                 .andExpect(jsonPath("name", is(name)));
     }
 
+    private int getId() throws Exception, UnsupportedEncodingException {
+        // Arrange -- identifier l'id de la session à modifier 
+        ResultActions resultGet = mockMvc.perform(get("/api/session/").header("Authorization", token));
+        String content = resultGet.andReturn().getResponse().getContentAsString();
+        int id = JsonPath.read(content, "$[0].id");
+        return id;
+    }
+
     // tester la route /api/session/{id}/participate
     @Test
     public void itShldParticipate() throws Exception {
         // Arrange -- identifier l'id de la session à supprimer
-        ResultActions resultGet = mockMvc.perform(get("/api/session/").header("Authorization", token));
-        String content = resultGet.andReturn().getResponse().getContentAsString();
-        int id = JsonPath.read(content, "$[0].id");
+        int id = getId();
 
         // Act -- simulate a post request to the route /api/session/id/participate
         ResultActions result = mockMvc
@@ -175,9 +180,8 @@ public class SessionControllerTests {
         itShldParticipate();
 
         // Arrange -- identifier l'id de la session à supprimer
-        ResultActions resultGet = mockMvc.perform(get("/api/session/").header("Authorization", token));
-        String content = resultGet.andReturn().getResponse().getContentAsString();
-        int id = JsonPath.read(content, "$[0].id");
+        int id = getId();
+
 
         // Act -- simulate a delete request to the route /api/session/id/participate/1
         ResultActions result = mockMvc
